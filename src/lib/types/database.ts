@@ -39,6 +39,79 @@ export type Database = {
   }
   public: {
     Tables: {
+      calendar_events: {
+        Row: {
+          activities: string | null
+          conflict_type: Database["public"]["Enums"]["conflict_type"]
+          date: string
+          id: string
+          location: string | null
+          notes: string | null
+          phase: string | null
+          plan_id: string
+        }
+        Insert: {
+          activities?: string | null
+          conflict_type?: Database["public"]["Enums"]["conflict_type"]
+          date: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          phase?: string | null
+          plan_id: string
+        }
+        Update: {
+          activities?: string | null
+          conflict_type?: Database["public"]["Enums"]["conflict_type"]
+          date?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          phase?: string | null
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendar_plans: {
+        Row: {
+          created_at: string
+          id: string
+          source_file_url: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          source_file_url?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          source_file_url?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_athlete_relationships: {
         Row: {
           athlete_id: string
@@ -113,6 +186,232 @@ export type Database = {
             columns: ["workout_id"]
             isOneToOne: false
             referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          relationship_id: string | null
+          type: Database["public"]["Enums"]["conversation_type"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          relationship_id?: string | null
+          type: Database["public"]["Enums"]["conversation_type"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          relationship_id?: string | null
+          type?: Database["public"]["Enums"]["conversation_type"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_relationship_id_fkey"
+            columns: ["relationship_id"]
+            isOneToOne: false
+            referencedRelation: "coach_athlete_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_cheers: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_cheers_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_cheers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_media: {
+        Row: {
+          created_at: string
+          file_url: string
+          id: string
+          media_type: Database["public"]["Enums"]["feed_media_type"]
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["feed_media_type"]
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["feed_media_type"]
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_media_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_posts: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          linked_workout_id: string | null
+          post_type: Database["public"]["Enums"]["feed_post_type"]
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          linked_workout_id?: string | null
+          post_type?: Database["public"]["Enums"]["feed_post_type"]
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          linked_workout_id?: string | null
+          post_type?: Database["public"]["Enums"]["feed_post_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_posts_linked_workout_id_fkey"
+            columns: ["linked_workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_media: {
+        Row: {
+          created_at: string
+          file_url: string
+          id: string
+          media_type: Database["public"]["Enums"]["message_media_type"]
+          message_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["message_media_type"]
+          message_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["message_media_type"]
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_media_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string | null
+          sender_type: Database["public"]["Enums"]["message_sender_type"]
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type?: Database["public"]["Enums"]["message_sender_type"]
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type?: Database["public"]["Enums"]["message_sender_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -339,6 +638,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      conflict_type: "travel" | "hiking" | "rest" | "none"
+      conversation_type: "coach_athlete" | "ai_agent"
+      feed_media_type: "image" | "video"
+      feed_post_type: "achievement" | "milestone" | "general"
+      message_media_type: "image" | "screenshot" | "file"
+      message_sender_type: "user" | "ai"
       relationship_status: "pending" | "active" | "archived"
       user_role: "runner" | "coach"
       workout_media_type: "screenshot" | "photo" | "document"
@@ -473,6 +778,12 @@ export const Constants = {
   },
   public: {
     Enums: {
+      conflict_type: ["travel", "hiking", "rest", "none"],
+      conversation_type: ["coach_athlete", "ai_agent"],
+      feed_media_type: ["image", "video"],
+      feed_post_type: ["achievement", "milestone", "general"],
+      message_media_type: ["image", "screenshot", "file"],
+      message_sender_type: ["user", "ai"],
       relationship_status: ["pending", "active", "archived"],
       user_role: ["runner", "coach"],
       workout_media_type: ["screenshot", "photo", "document"],

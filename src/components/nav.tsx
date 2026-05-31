@@ -30,6 +30,9 @@ export async function Nav() {
             <Link href="/plan" className="hover:text-foreground">
               Plan
             </Link>
+            <Link href="/messages" className="hover:text-foreground">
+              Messages
+            </Link>
           </div>
         </div>
         <UserMenu
