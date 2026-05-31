@@ -36,7 +36,7 @@ export function parseTrainingPlanExcel(buffer: ArrayBuffer): ParsedPlan {
 
   const raceSheet = workbook.Sheets["Race Schedule 2026"];
   if (raceSheet) {
-    const raceData = XLSX.utils.sheet_to_json<Record<string, unknown>>(raceSheet, {
+    const raceData = XLSX.utils.sheet_to_json(raceSheet, {
       header: 1,
       defval: null,
     }) as unknown[][];
@@ -70,7 +70,7 @@ export function parseTrainingPlanExcel(buffer: ArrayBuffer): ParsedPlan {
 
   for (const sheetName of weekSheetNames) {
     const sheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+    const data = XLSX.utils.sheet_to_json(sheet, {
       header: 1,
       defval: null,
       raw: false,
