@@ -1,4 +1,3 @@
-export type Json =
   | string
   | number
   | boolean
@@ -78,6 +77,45 @@ export type Database = {
           },
         ]
       }
+      comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          workout_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          workout_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -102,6 +140,196 @@ export type Database = {
         }
         Relationships: []
       }
+      training_plans: {
+        Row: {
+          athlete_id: string
+          coach_id: string
+          created_at: string
+          goal_date: string | null
+          goal_race: string | null
+          goal_time: string | null
+          id: string
+          source_file_url: string | null
+          title: string
+        }
+        Insert: {
+          athlete_id: string
+          coach_id: string
+          created_at?: string
+          goal_date?: string | null
+          goal_race?: string | null
+          goal_time?: string | null
+          id?: string
+          source_file_url?: string | null
+          title: string
+        }
+        Update: {
+          athlete_id?: string
+          coach_id?: string
+          created_at?: string
+          goal_date?: string | null
+          goal_race?: string | null
+          goal_time?: string | null
+          id?: string
+          source_file_url?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plans_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plans_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_weeks: {
+        Row: {
+          date_end: string
+          date_start: string
+          focus: string | null
+          id: string
+          notes: string | null
+          plan_id: string
+          week_number: number
+        }
+        Insert: {
+          date_end: string
+          date_start: string
+          focus?: string | null
+          id?: string
+          notes?: string | null
+          plan_id: string
+          week_number: number
+        }
+        Update: {
+          date_end?: string
+          date_start?: string
+          focus?: string | null
+          id?: string
+          notes?: string | null
+          plan_id?: string
+          week_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_weeks_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "training_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_media: {
+        Row: {
+          ai_analysis: Json | null
+          created_at: string
+          file_url: string
+          id: string
+          media_type: Database["public"]["Enums"]["workout_media_type"]
+          uploaded_by: string
+          workout_id: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          created_at?: string
+          file_url: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["workout_media_type"]
+          uploaded_by: string
+          workout_id: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          created_at?: string
+          file_url?: string
+          id?: string
+          media_type?: Database["public"]["Enums"]["workout_media_type"]
+          uploaded_by?: string
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_media_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_media_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workouts: {
+        Row: {
+          avg_hr: number | null
+          created_at: string
+          date: string
+          day_of_week: string
+          id: string
+          log: string | null
+          miles: number | null
+          perceived_effort: number | null
+          prescribed_workout: string
+          status: Database["public"]["Enums"]["workout_status"]
+          strava_activity_id: string | null
+          strength_misc: string | null
+          week_id: string
+        }
+        Insert: {
+          avg_hr?: number | null
+          created_at?: string
+          date: string
+          day_of_week: string
+          id?: string
+          log?: string | null
+          miles?: number | null
+          perceived_effort?: number | null
+          prescribed_workout: string
+          status?: Database["public"]["Enums"]["workout_status"]
+          strava_activity_id?: string | null
+          strength_misc?: string | null
+          week_id: string
+        }
+        Update: {
+          avg_hr?: number | null
+          created_at?: string
+          date?: string
+          day_of_week?: string
+          id?: string
+          log?: string | null
+          miles?: number | null
+          perceived_effort?: number | null
+          prescribed_workout?: string
+          status?: Database["public"]["Enums"]["workout_status"]
+          strava_activity_id?: string | null
+          strength_misc?: string | null
+          week_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workouts_week_id_fkey"
+            columns: ["week_id"]
+            isOneToOne: false
+            referencedRelation: "training_weeks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -112,6 +340,8 @@ export type Database = {
     Enums: {
       relationship_status: "pending" | "active" | "archived"
       user_role: "runner" | "coach"
+      workout_media_type: "screenshot" | "photo" | "document"
+      workout_status: "upcoming" | "completed" | "missed" | "modified"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -244,6 +474,8 @@ export const Constants = {
     Enums: {
       relationship_status: ["pending", "active", "archived"],
       user_role: ["runner", "coach"],
+      workout_media_type: ["screenshot", "photo", "document"],
+      workout_status: ["upcoming", "completed", "missed", "modified"],
     },
   },
 } as const
