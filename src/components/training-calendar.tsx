@@ -59,7 +59,22 @@ export function TrainingCalendar({ workouts, planId }: TrainingCalendarProps) {
   const todayKey = toDateKey(new Date());
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
-    return { year: now.getFullYear(), month: now.getMonth() };
+    const currentYM = { year: now.getFullYear(), month: now.getMonth() };
+
+    // Check if the current month has any workouts
+    const hasCurrentMonthWorkouts = workouts.some((w) => {
+      const d = new Date(w.date + "T12:00:00");
+      return d.getFullYear() === currentYM.year && d.getMonth() === currentYM.month;
+    });
+
+    if (hasCurrentMonthWorkouts || workouts.length === 0) {
+      return currentYM;
+    }
+
+    // Default to the first month that has workouts
+    const firstWorkout = [...workouts].sort((a, b) => a.date.localeCompare(b.date))[0];
+    const firstDate = new Date(firstWorkout.date + "T12:00:00");
+    return { year: firstDate.getFullYear(), month: firstDate.getMonth() };
   });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
