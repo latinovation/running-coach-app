@@ -83,3 +83,23 @@ This document tracks all major decisions made during the development of the runn
 **Decision:** shadcn/ui uses `@base-ui/react` (not Radix UI) as of v4.8+. The `DropdownMenuTrigger` no longer supports `asChild` — children are rendered directly inside the trigger element.
 
 **Impact:** All dropdown trigger patterns must place the trigger content as children, not use the `asChild` prop pattern from older Radix-based examples.
+
+---
+
+## 2026-05-31 — V1 Feature Set
+
+**Decision:** V1 includes: auth, training plans (Excel import), workouts (logging, comments, media), calendar view (hybrid month grid + detail panel with toggle), calendar conflicts (CSV import, auto-detection), messaging (coach-runner realtime chat), community feed (posts, cheers), and profile settings.
+
+**Deferred to V1.1:**
+- Strava integration (requires API key registration at developers.strava.com)
+- AI agent (requires Vercel AI Gateway OIDC setup)
+- Rich media in messages (image/file attachments)
+- Coach invitation system (email-based)
+
+---
+
+## 2026-05-31 — Calendar View Design
+
+**Decision:** Hybrid calendar — mini month grid on the left with color-coded workout status dots, detail panel on the right showing selected day's workout and conflict info. Calendar/List toggle persists via URL search params.
+
+**Rationale:** Gives spatial overview without sacrificing detail. Toggle lets users switch to the list view (week cards) for reading detailed prescriptions.
