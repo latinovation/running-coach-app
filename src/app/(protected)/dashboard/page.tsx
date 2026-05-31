@@ -1,10 +1,18 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { WeekCard } from "@/components/week-card";
+import { TrainingCalendar } from "@/components/training-calendar";
+import { ViewToggle } from "@/components/view-toggle";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  const { view = "calendar" } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -14,7 +22,8 @@ export default async function DashboardPage() {
     .eq("id", user!.id)
     .single();
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date();
+  const todayKey = today.toISOString().split("T")[0];
 
   // Get the user's plan
   const { data: plan } = await supabase
@@ -24,31 +33,63 @@ export default async function DashboardPage() {
     .limit(1)
     .single();
 
-  // Get current week if a plan exists
+  // Get all workouts for the current month (for calendar view)
+  let monthWorkouts: Array<{
+    id: string;
+    date: string;
+    day_of_week: string;
+    prescribed_workout: string;
+    status: "upcoming" | "completed" | "missed" | "modified";
+    miles: number | null;
+    perceived_effort: number | null;
+    log: string | null;
+    avg_hr: number | null;
+    strength_misc: string | null;
+  }> = [];
+
   let currentWeek = null;
+
   if (plan) {
-    const { data: week } = await supabase
+    // Get all workouts across all weeks for this plan (calendar needs the full picture)
+    const { data: weeks } = await supabase
       .from("training_weeks")
       .select(`
         id, week_number, date_start, date_end, focus,
         workouts (
-          id, date, day_of_week, prescribed_workout, status, miles, perceived_effort
+          id, date, day_of_week, prescribed_workout, status, miles, perceived_effort, log, avg_hr, strength_misc
         )
       `)
       .eq("plan_id", plan.id)
-      .lte("date_start", today)
-      .gte("date_end", today)
-      .order("date", { referencedTable: "workouts" })
-      .single();
+      .order("week_number")
+      .order("date", { referencedTable: "workouts" });
 
-    currentWeek = week;
+    monthWorkouts = (weeks ?? []).flatMap((w) =>
+      (w.workouts ?? []).map((workout) => ({
+        ...workout,
+        log: workout.log ?? null,
+        avg_hr: workout.avg_hr ?? null,
+        strength_misc: workout.strength_misc ?? null,
+      })),
+    );
+
+    // Find current week for list view
+    currentWeek = (weeks ?? []).find(
+      (w) => todayKey >= w.date_start && todayKey <= w.date_end,
+    ) ?? null;
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold">
-        Welcome, {profile?.display_name}
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">
+          Welcome, {profile?.display_name}
+        </h1>
+        {plan && (
+          <Suspense>
+            <ViewToggle />
+          </Suspense>
+        )}
+      </div>
 
       {!plan ? (
         <Card>
@@ -66,6 +107,13 @@ export default async function DashboardPage() {
             </Link>
           </CardContent>
         </Card>
+      ) : view === "calendar" ? (
+        <>
+          <TrainingCalendar workouts={monthWorkouts} planId={plan.id} />
+          <Link href={`/plan/${plan.id}`}>
+            <Button variant="outline">View Full Plan</Button>
+          </Link>
+        </>
       ) : (
         <>
           {currentWeek ? (
