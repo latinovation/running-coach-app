@@ -16,9 +16,17 @@ interface CalendarWorkout {
   strength_misc?: string | null;
 }
 
+interface CalendarConflict {
+  date: string;
+  location: string | null;
+  activities: string | null;
+  conflict_type: string;
+}
+
 interface CalendarDayDetailProps {
   workout: CalendarWorkout | null;
   planId: string;
+  conflict?: CalendarConflict | null;
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -28,12 +36,35 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   upcoming: { label: "Upcoming", className: "bg-sky-500/15 text-sky-400 border-sky-500/30" },
 };
 
-export function CalendarDayDetail({ workout, planId }: CalendarDayDetailProps) {
+const conflictTypeLabel: Record<string, string> = {
+  travel: "Travel day",
+  hiking: "Hiking / trail activity",
+  rest: "Rest / recovery",
+  none: "Conflict",
+};
+
+export function CalendarDayDetail({ workout, planId, conflict }: CalendarDayDetailProps) {
   if (!workout) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[280px] text-center px-6">
         <div className="w-10 h-10 rounded-full border-2 border-dashed border-zinc-700 mb-3" />
-        <p className="text-sm text-muted-foreground">Select a day to see workout details</p>
+        {conflict ? (
+          <div className="w-full text-left mt-2">
+            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3">
+              <p className="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-1">
+                {conflictTypeLabel[conflict.conflict_type] ?? "Conflict"}
+              </p>
+              {conflict.activities && (
+                <p className="text-sm text-amber-300/80 leading-snug">{conflict.activities}</p>
+              )}
+              {conflict.location && (
+                <p className="text-xs text-muted-foreground mt-1">{conflict.location}</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Select a day to see workout details</p>
+        )}
       </div>
     );
   }
@@ -104,6 +135,21 @@ export function CalendarDayDetail({ workout, planId }: CalendarDayDetailProps) {
         <div>
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Strength / Misc</p>
           <p className="text-sm text-muted-foreground">{workout.strength_misc}</p>
+        </div>
+      )}
+
+      {/* Conflict warning */}
+      {conflict && (
+        <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3">
+          <p className="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-1">
+            {conflictTypeLabel[conflict.conflict_type] ?? "Conflict"}
+          </p>
+          {conflict.activities && (
+            <p className="text-sm text-amber-300/80 leading-snug">{conflict.activities}</p>
+          )}
+          {conflict.location && (
+            <p className="text-xs text-muted-foreground mt-1">{conflict.location}</p>
+          )}
         </div>
       )}
 

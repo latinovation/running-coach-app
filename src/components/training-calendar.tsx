@@ -18,9 +18,17 @@ interface CalendarWorkout {
   strength_misc?: string | null;
 }
 
+interface CalendarConflict {
+  date: string;
+  location: string | null;
+  activities: string | null;
+  conflict_type: string;
+}
+
 interface TrainingCalendarProps {
   workouts: CalendarWorkout[];
   planId: string;
+  conflicts?: CalendarConflict[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -55,7 +63,7 @@ function toDateKey(date: Date): string {
   return date.toISOString().split("T")[0];
 }
 
-export function TrainingCalendar({ workouts, planId }: TrainingCalendarProps) {
+export function TrainingCalendar({ workouts, planId, conflicts = [] }: TrainingCalendarProps) {
   const todayKey = toDateKey(new Date());
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date();
@@ -86,6 +94,15 @@ export function TrainingCalendar({ workouts, planId }: TrainingCalendarProps) {
     }
     return map;
   }, [workouts]);
+
+  // Index conflicts by date
+  const conflictMap = useMemo(() => {
+    const map = new Map<string, CalendarConflict>();
+    for (const c of conflicts) {
+      map.set(c.date, c);
+    }
+    return map;
+  }, [conflicts]);
 
   // Build the calendar grid for the current month
   const calendarDays = useMemo(() => {
@@ -155,6 +172,7 @@ export function TrainingCalendar({ workouts, planId }: TrainingCalendarProps) {
   }
 
   const selectedWorkout = selectedDate ? workoutMap.get(selectedDate) ?? null : null;
+  const selectedConflict = selectedDate ? conflictMap.get(selectedDate) ?? null : null;
 
   return (
     <Card className="overflow-hidden">
@@ -189,6 +207,7 @@ export function TrainingCalendar({ workouts, planId }: TrainingCalendarProps) {
           <div className="grid grid-cols-7 gap-[2px]">
             {calendarDays.map(({ key, date, inMonth }) => {
               const workout = workoutMap.get(key);
+              const conflict = conflictMap.get(key);
               const isToday = key === todayKey;
               const isSelected = key === selectedDate;
               const dayNum = date.getDate();
@@ -211,6 +230,9 @@ export function TrainingCalendar({ workouts, planId }: TrainingCalendarProps) {
                   <span className="font-mono tabular-nums font-medium">{dayNum}</span>
                   {workout && (
                     <span className={`absolute bottom-1 w-1.5 h-1.5 rounded-full ${STATUS_COLORS[workout.status]}`} />
+                  )}
+                  {conflict && (
+                    <span className="absolute top-0.5 right-0.5 w-0 h-0 border-l-[5px] border-l-transparent border-t-[5px] border-t-amber-500" />
                   )}
                 </button>
               );
@@ -242,7 +264,7 @@ export function TrainingCalendar({ workouts, planId }: TrainingCalendarProps) {
 
         {/* Right: Detail Panel */}
         <div className="md:w-72 lg:w-80 border-t md:border-t-0 md:border-l border-zinc-800 p-4 md:p-5">
-          <CalendarDayDetail workout={selectedWorkout} planId={planId} />
+          <CalendarDayDetail workout={selectedWorkout} planId={planId} conflict={selectedConflict} />
         </div>
       </div>
     </Card>

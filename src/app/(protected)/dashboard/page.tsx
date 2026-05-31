@@ -48,6 +48,7 @@ export default async function DashboardPage({
   }> = [];
 
   let currentWeek = null;
+  let conflicts: Array<{ date: string; location: string | null; activities: string | null; conflict_type: string }> = [];
 
   if (plan) {
     // Get all workouts across all weeks for this plan (calendar needs the full picture)
@@ -71,6 +72,20 @@ export default async function DashboardPage({
         strength_misc: workout.strength_misc ?? null,
       })),
     );
+
+    // Fetch calendar conflicts for the current user
+    const { data: calPlans } = await supabase
+      .from("calendar_plans")
+      .select("id")
+      .eq("user_id", user!.id);
+    if (calPlans && calPlans.length > 0) {
+      const calPlanIds = calPlans.map((p) => p.id);
+      const { data: calEvents } = await supabase
+        .from("calendar_events")
+        .select("date, location, activities, conflict_type")
+        .in("plan_id", calPlanIds);
+      conflicts = calEvents ?? [];
+    }
 
     // Find current week for list view
     currentWeek = (weeks ?? []).find(
@@ -109,7 +124,7 @@ export default async function DashboardPage({
         </Card>
       ) : view === "calendar" ? (
         <>
-          <TrainingCalendar workouts={monthWorkouts} planId={plan.id} />
+          <TrainingCalendar workouts={monthWorkouts} planId={plan.id} conflicts={conflicts} />
           <Link href={`/plan/${plan.id}`}>
             <Button variant="outline">View Full Plan</Button>
           </Link>

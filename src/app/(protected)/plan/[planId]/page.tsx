@@ -18,7 +18,7 @@ export default async function PlanPage({
 
   const { data: plan } = await supabase
     .from("training_plans")
-    .select("id, title, goal_race, goal_date, goal_time")
+    .select("id, title, goal_race, goal_date, goal_time, athlete_id")
     .eq("id", planId)
     .single();
 
@@ -37,6 +37,24 @@ export default async function PlanPage({
     .order("date", { referencedTable: "workouts" });
 
   const today = new Date().toISOString().split("T")[0];
+
+  // Fetch calendar conflicts for the athlete
+  const athleteId = plan.athlete_id;
+  let conflicts: Array<{ date: string; location: string | null; activities: string | null; conflict_type: string }> = [];
+  if (athleteId) {
+    const { data: calPlans } = await supabase
+      .from("calendar_plans")
+      .select("id")
+      .eq("user_id", athleteId);
+    if (calPlans && calPlans.length > 0) {
+      const planIds = calPlans.map((p) => p.id);
+      const { data: calEvents } = await supabase
+        .from("calendar_events")
+        .select("date, location, activities, conflict_type")
+        .in("plan_id", planIds);
+      conflicts = calEvents ?? [];
+    }
+  }
 
   // Flatten workouts for the calendar view
   const allWorkouts = (weeks ?? []).flatMap((w) =>
@@ -65,7 +83,7 @@ export default async function PlanPage({
       </div>
 
       {view === "calendar" ? (
-        <TrainingCalendar workouts={allWorkouts} planId={planId} />
+        <TrainingCalendar workouts={allWorkouts} planId={planId} conflicts={conflicts} />
       ) : (
         <div className="flex flex-col gap-6">
           {weeks?.map((week) => {
