@@ -27,6 +27,9 @@ export async function Nav() {
             <Link href="/dashboard" className="hover:text-foreground">
               Dashboard
             </Link>
+            <Link href="/plan" className="hover:text-foreground">
+              Plan
+            </Link>
           </div>
         </div>
         <UserMenu
